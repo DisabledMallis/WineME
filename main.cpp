@@ -100,15 +100,9 @@ int main() {
         }
         if(ImGui::ListBoxHeader("##Processes", ImVec2(-FLT_MIN, ImGui::GetContentRegionAvail().y))) {
             ProcFinder::ForEachProc([](ProcMeta& meta) {
-                //Calc length that will be printed
-                size_t lenReq = snprintf(0, 0, "%x (%d) %s", meta.GetPID(), meta.GetPID(), meta.GetProcCmd().c_str());
-                //Allocate on the stack
-                char* text = (char*)alloca(lenReq+1);
-                //Format into that buffer
-                sprintf(text, "%x (%d) %s", meta.GetPID(), meta.GetPID(), meta.GetProcCmd().c_str());
                 //Render
-                if(std::string(text).find(std::string(searchBuf)) != std::string::npos)
-                    ImGui::Selectable(text);
+                if(meta.GetFormatted().find(std::string(searchBuf)) != std::string::npos)
+                    ImGui::Selectable(meta.GetFormatted().c_str());
             });
             ImGui::ListBoxFooter();
         }
