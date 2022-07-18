@@ -12,6 +12,7 @@ Worker::Worker() {
             }
         }
     });
+    this->innerThread.detach();
 }
 
 void Worker::DoWork(std::function<void()> func) {

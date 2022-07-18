@@ -65,14 +65,7 @@ int main() {
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    std::thread procLister([](){
-        sleep(3);
-        while(true) {
-            ProcFinder::UpdateProcList();
-            sleep(1);
-        }
-    });
-    procLister.detach();
+    static Worker asyncWorker;
 
     // Main loop
     bool done = false;
@@ -101,6 +94,12 @@ int main() {
         ImGui::Begin("Select a process", 0);
         static char searchBuf[256] = "";
         ImGui::InputText("Search", searchBuf, 255);
+        ImGui::SameLine();
+        if(ImGui::Button("Refresh")) {
+            asyncWorker.DoWork([](){
+                ProcFinder::UpdateProcList();
+            });
+        }
         if(ImGui::ListBoxHeader("##Processes", ImVec2(-FLT_MIN, ImGui::GetContentRegionAvail().y))) {
             const std::vector<ProcMeta>& allProcs = ProcFinder::GetAllProcs();
             for(ProcMeta meta : allProcs) {

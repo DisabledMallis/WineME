@@ -9,36 +9,38 @@ std::mutex metaLock;
 static std::vector<ProcMeta> procMetaHolder;
 
 const std::vector<ProcMeta>& ProcFinder::GetAllProcs() {
-    metaLock.lock();
-    metaLock.unlock();
+    const std::lock_guard<std::mutex> lock(metaLock);
     return procMetaHolder;
 }
 
 const std::vector<ProcMeta>& ProcFinder::UpdateProcList() {
-    metaLock.lock();
+    const std::lock_guard<std::mutex> lock(metaLock);
     procMetaHolder.clear();
     if(fs::exists("/proc")) {
         //Update process list
-        printf("Updating proc list");
+        printf("Updating proc list\n");
         for(auto const& dir : fs::directory_iterator("/proc")) {
-            //printf("%s", dir.path().filename().string().c_str());
-            fs::path cmdLinePath = dir / fs::path("cmdline");
-            std::ifstream cmdLineStream(cmdLinePath);
-            std::string cmdLine(std::istreambuf_iterator<char>{cmdLineStream}, {});
-            std::string pidStr = dir.path().filename().string();
-            printf("%s", pidStr.c_str());
+            if(!dir.is_directory())
+                continue;
             try {
+                std::string pidStr = dir.path().filename().string();
                 size_t pid = stoi(pidStr);
+
+                fs::path cmdLinePath = dir / fs::path("cmdline");
+                std::ifstream cmdLineStream(cmdLinePath);
+                std::string cmdLine(std::istreambuf_iterator<char>{cmdLineStream}, {});
+
+                printf("%s\n", pidStr.c_str());
                 procMetaHolder.emplace_back(cmdLine, pid);
             }
             catch(std::exception& ex) {
                 //Not all dirs in /proc are actually procids, and may contain things other than numbers.
                 //we don't really care about these though
+                printf("Error reading proc: %s\n", ex.what());
             }
         }
     } else {
         printf("No proc folder in root?");
     }
-    metaLock.unlock();
-    return GetAllProcs();
+    return procMetaHolder;
 }
