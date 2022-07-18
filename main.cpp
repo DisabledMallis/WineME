@@ -8,7 +8,7 @@
 #include "procFinder.h"
 
 int main() {
-    printf("Starting WineMem...");
+    printf("Starting WineME...");
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
@@ -106,8 +106,8 @@ int main() {
                 if(std::string(text).find(std::string(searchBuf)) != std::string::npos)
                     ImGui::Selectable(text);
             }
+            ImGui::ListBoxFooter();
         }
-        ImGui::ListBoxFooter();
         ImGui::End();
 
         // Rendering
