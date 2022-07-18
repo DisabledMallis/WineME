@@ -10,15 +10,10 @@
 int main() {
     printf("Starting WineMem...");
 
-    std::thread procLister([](){
-        while(true) {
-            ProcFinder::UpdateProcList();
-            sleep(1);
-        }
-    });
-
-    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printf("SDL_Init error: %x", SDL_GetError());
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return -1;
     }
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
@@ -70,6 +65,15 @@ int main() {
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    std::thread procLister([](){
+        sleep(3);
+        while(true) {
+            ProcFinder::UpdateProcList();
+            sleep(1);
+        }
+    });
+    procLister.detach();
+
     // Main loop
     bool done = false;
     while (!done)
@@ -102,7 +106,8 @@ int main() {
             for(ProcMeta meta : allProcs) {
                 char text[256];
                 sprintf(text, "%x (%d) %s", meta.GetPID(), meta.GetPID(), meta.GetProcCmd().c_str());
-                ImGui::Selectable(text);
+                if(std::string(text).find(std::string(searchBuf)) != std::string::npos)
+                    ImGui::Selectable(text);
             }
         }
         ImGui::ListBoxFooter();
