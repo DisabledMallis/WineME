@@ -6,10 +6,10 @@ set(CMAKE_BUILD_TYPE Debug)
 add_executable(WineME)
 target_sources(WineME PRIVATE
     "main.cpp"
-    "proc.cpp"
-    "procFinder.cpp"
-    "worker.cpp"
 )
+add_subdirectory(scanner)
+add_subdirectory(system)
+add_subdirectory(util)
 
 find_package(SDL2 REQUIRED)
 include_directories(WineME ${SDL2_INCLUDE_DIRS})

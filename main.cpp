@@ -4,8 +4,11 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_sdlrenderer.h>
 #include <thread>
-#include "worker.h"
-#include "procFinder.h"
+#include "util/worker.h"
+#include "system/procFinder.h"
+#include "scanner/scanner.h"
+
+static std::vector<Feature*> activeFeatures;
 
 int main() {
     printf("Starting WineME...");
@@ -101,12 +104,24 @@ int main() {
         if(ImGui::ListBoxHeader("##Processes", ImVec2(-FLT_MIN, ImGui::GetContentRegionAvail().y))) {
             ProcFinder::ForEachProc([](ProcMeta& meta) {
                 //Render
-                if(meta.GetFormatted().find(std::string(searchBuf)) != std::string::npos)
-                    ImGui::Selectable(meta.GetFormatted().c_str());
+                if(meta.GetFormatted().find(std::string(searchBuf)) != std::string::npos) {
+                    if(ImGui::Selectable(meta.GetFormatted().c_str())) {
+                        activeFeatures.push_back(new Scanner(meta));
+                    }
+                }
             });
             ImGui::ListBoxFooter();
         }
         ImGui::End();
+
+        for(int i = activeFeatures.size()-1; i >= 0; i--) {
+            if(activeFeatures[i]->pleaseDelete) {
+                delete activeFeatures[i];
+                activeFeatures.erase(activeFeatures.begin() + i);
+            } else {
+                activeFeatures[i]->Render();
+            }
+        }
 
         // Rendering
         ImGui::Render();
