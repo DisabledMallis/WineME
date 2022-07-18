@@ -44,3 +44,10 @@ const std::vector<ProcMeta>& ProcFinder::UpdateProcList() {
     }
     return procMetaHolder;
 }
+
+void ProcFinder::ForEachProc(std::function<void(ProcMeta&)> func) {
+    const std::lock_guard<std::mutex> lock(metaLock);
+    for(ProcMeta& meta : procMetaHolder) {
+        func(meta);
+    }
+}

@@ -17,7 +17,7 @@ int main() {
     }
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("WineME", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 
     // Setup SDL_Renderer instance
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
@@ -99,13 +99,17 @@ int main() {
             });
         }
         if(ImGui::ListBoxHeader("##Processes", ImVec2(-FLT_MIN, ImGui::GetContentRegionAvail().y))) {
-            const std::vector<ProcMeta>& allProcs = ProcFinder::GetAllProcs();
-            for(ProcMeta meta : allProcs) {
-                char text[256];
+            ProcFinder::ForEachProc([](ProcMeta& meta) {
+                //Calc length that will be printed
+                size_t lenReq = snprintf(0, 0, "%x (%d) %s", meta.GetPID(), meta.GetPID(), meta.GetProcCmd().c_str());
+                //Allocate on the stack
+                char* text = (char*)alloca(lenReq+1);
+                //Format into that buffer
                 sprintf(text, "%x (%d) %s", meta.GetPID(), meta.GetPID(), meta.GetProcCmd().c_str());
+                //Render
                 if(std::string(text).find(std::string(searchBuf)) != std::string::npos)
                     ImGui::Selectable(text);
-            }
+            });
             ImGui::ListBoxFooter();
         }
         ImGui::End();

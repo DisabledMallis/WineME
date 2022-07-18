@@ -15,6 +15,10 @@ Worker::Worker() {
     this->innerThread.detach();
 }
 
+Worker::~Worker() {
+    this->innerThread.~thread();
+}
+
 void Worker::DoWork(std::function<void()> func) {
     this->workQueue.push_back(func);
 }

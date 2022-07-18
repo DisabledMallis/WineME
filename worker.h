@@ -9,5 +9,6 @@ class Worker {
     std::thread innerThread;
 public:
     Worker();
+    ~Worker();
     void DoWork(std::function<void()> func);
 };
