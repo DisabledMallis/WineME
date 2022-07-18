@@ -1,4 +1,4 @@
-# WineMem
+# WineME (Wine Memory Editor)
 A CheatEngine clone designed for use on Linux systems with the goal of hacking games running on Proton or Wine. Linux processes aren't safe either, however!
 
 ## Why?
